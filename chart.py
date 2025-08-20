@@ -32,48 +32,39 @@ df = pd.DataFrame(campaign_data)
 sns.set_style("whitegrid")
 sns.set_context("notebook", font_scale=1.2)
 
-# Create figure with exact dimensions
+
+# Create figure with exact dimensions for 512x512 output
 plt.figure(figsize=(8, 8))
 
-# Create the Seaborn scatterplot - this is the key validation point
-sns.scatterplot(
+# Create a Seaborn barplot: average conversion rate by campaign type
+bar_palette = 'Set2'
+ax = sns.barplot(
     data=df,
-    x='marketing_spend',
+    x='campaign_type',
     y='conversion_rate',
-    hue='campaign_type',
-    size='duration_days',
-    sizes=(60, 200),
-    alpha=0.8,
-    palette='Set2'
+    estimator=np.mean,
+    ci='sd',
+    palette=bar_palette,
+    edgecolor='black',
+    errorbar='sd'
 )
 
-# Customize the plot professionally
-plt.title('Marketing Campaign Effectiveness Analysis\nSpend vs Conversion Rate by Campaign Type', 
-          fontsize=16, fontweight='bold', pad=20)
-plt.xlabel('Marketing Spend (Thousands USD)', fontsize=14, fontweight='semibold')
-plt.ylabel('Conversion Rate (%)', fontsize=14, fontweight='semibold')
+# Professional styling
+plt.title('Average Conversion Rate by Campaign Type', fontsize=16, fontweight='bold', pad=20)
+plt.xlabel('Campaign Type', fontsize=14, fontweight='semibold')
+plt.ylabel('Average Conversion Rate (%)', fontsize=14, fontweight='semibold')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
 
-# Improve legend positioning
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-# Add subtle grid and styling
-plt.grid(True, alpha=0.3)
+# Add grid and remove top/right spines
+plt.grid(axis='y', alpha=0.3)
 sns.despine()
 
-# Ensure tight layout
+# Tight layout for saving
 plt.tight_layout()
 
-# Save to buffer and resize to exactly 512x512
-buf = io.BytesIO()
-plt.savefig(buf, format='png', dpi=80, facecolor='white', edgecolor='none', 
-            bbox_inches='tight')
-buf.seek(0)
-
-# Resize to exactly 512x512 pixels
-img = Image.open(buf)
-img_resized = img.resize((512, 512), Image.Resampling.LANCZOS)
-img_resized.save('chart.png', 'PNG', optimize=True)
-buf.close()
+# Save chart as PNG with exactly 512x512 pixels
+plt.savefig('chart.png', dpi=64, bbox_inches='tight', facecolor='white', edgecolor='none')
 
 # Display summary statistics
 print("Marketing Campaign Effectiveness Analysis")
@@ -82,6 +73,6 @@ print(f"Total Campaigns: {len(df)}")
 print(f"Average Marketing Spend: ${df['marketing_spend'].mean():.2f}K")
 print(f"Average Conversion Rate: {df['conversion_rate'].mean():.2f}%")
 print(f"Correlation (Spend vs Conversion): {df['marketing_spend'].corr(df['conversion_rate']):.3f}")
-print("\nChart generated successfully with Seaborn scatterplot!")
+print("\nChart generated successfully with Seaborn barplot!")
 
 plt.show()
